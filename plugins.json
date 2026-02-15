@@ -1,0 +1,22 @@
+[
+  {
+    "name": "EDBPlugin/debug-editor-plugin",
+    "url": "https://github.com/EDBPlugin/debug-editor-plugin"
+  },
+  {
+    "name": "himais0giiiin/secure-token-setting",
+    "url": "https://github.com/himais0giiiin/secure-token-setting"
+  },
+  {
+    "name": "appipinopi/Plugin-test",
+    "url": "https://github.com/appipinopi/Plugin-test"
+  },
+  {
+    "name": "appipinopi/TimeScheduler",
+    "url": "https://github.com/appipinopi/TimeScheduler"
+  },
+  {
+    "name": "appipinopi/Malicious-Test-Plugin",
+    "url": "https://github.com/appipinopi/Malicious-Test-Plugin"
+  }
+]
