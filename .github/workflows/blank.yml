@@ -1,32 +1,47 @@
-name: Check EDBP Plugins
+name: Check EDBP Plugins (Random Interval)
 on:
   schedule:
-    - cron: '0 15 * * *' # 日本時間 00:00
+    - cron: '0 15 * * *' # 毎日日本時間0時に強制リセット実行
   workflow_dispatch:
+  repository_dispatch:
+    types: [next_run]
 
 jobs:
-  check-and-update:
+  check-and-schedule:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 書き込み権限が必要
+      contents: write
+      actions: write # 次の実行を予約するために必要
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Process Plugins
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # これでghコマンドが動くようになります
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node process_plugins.js
 
       - name: Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add readme.json plugin.json plugins.json
-          git commit -m "chore: update plugin registries" || exit 0
+          git add readme.json plugins.json all.json
+          git commit -m "chore: update plugin lists" || exit 0
           git push
+
+      - name: Schedule Next Run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 30分(1800s) 〜 150分(9000s) の間でランダムな秒数を計算
+          MIN=1800
+          MAX=9000
+          SLEEP_TIME=$(( ( RANDOM % (MAX - MIN + 1 ) ) + MIN ))
+          echo "Next run in $SLEEP_TIME seconds."
+          
+          # 指定時間待機してから次のワークフローをトリガー
+          sleep $SLEEP_TIME
+          curl -X POST -H "Authorization: token $GH_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/dispatches \
+          -d '{"event_type": "next_run"}'
