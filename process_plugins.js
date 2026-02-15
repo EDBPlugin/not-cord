@@ -1,47 +1,81 @@
-const fs = require('fs');
 const { execSync } = require('child_process');
+const fs = require('fs');
 
-async function fetchPlugins() {
-    const query = `topic:edbp-plugin`;
-    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}`;
-    
-    console.log(`Searching for: ${url}`);
-    const response = JSON.parse(execSync(`gh api "${url}"`).toString());
-    const repos = response.items;
+/**
+ * topic:edbp-plugin が付いたリポジトリを検索
+ */
+function fetchPlugins() {
+    console.log("Searching for: topic:edbp-plugin");
+    try {
+        const output = execSync('gh api "search/repositories?q=topic:edbp-plugin"', { encoding: 'utf-8' });
+        const data = JSON.parse(output);
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching repositories:", error.message);
+        return [];
+    }
+}
 
-    const readmeJson = []; // README.md がない
-    const pluginsJson = []; // plugin.js がない
-    const manifestJson = []; // manifest.json がない
+/**
+ * リポジトリ内の特定のファイルをチェックする
+ */
+function checkFileExists(repoFullName, filePath) {
+    try {
+        // gh api でファイル情報を取得。存在しないとエラー(404)を投げる
+        execSync(`gh api repos/${repoFullName}/contents/${filePath}`, { stdio: 'ignore' });
+        return true; 
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * メイン処理
+ */
+function main() {
+    const repos = fetchPlugins();
+    const resultList = [];
+
+    console.log(`Found ${repos.length} repositories. Checking files...\n`);
 
     for (const repo of repos) {
-        const fullName = repo.full_name;
-        const contentsUrl = `https://api.github.com/repos/${fullName}/contents/`;
+        const missingFiles = [];
         
-        try {
-            const contents = JSON.parse(execSync(`gh api "${contentsUrl}"`).toString());
-            const fileNames = contents.map(f => f.name.toLowerCase());
+        // 1. manifest.json のチェック
+        if (!checkFileExists(repo.full_name, 'manifest.json')) {
+            missingFiles.push('manifest.json');
+        }
 
-            const hasReadme = fileNames.includes('readme.md');
-            const hasPluginJs = fileNames.includes('plugin.js');
-            const manifestJson = fileNames.includes('manifest.json');
+        // 2. plugins.js のチェック
+        if (!checkFileExists(repo.full_name, 'plugins.js')) {
+            missingFiles.push('plugins.json');
+        }
 
-            const repoData = {
-                name: repo.name,
-                full_name: repo.full_name,
-                html_url: repo.html_url,
-                description: repo.description
-            };
+        // 3. README.md のチェック
+        if (!checkFileExists(repo.full_name, 'README.md')) {
+            missingFiles.push('readme.json');
+        }
 
-        } catch (e) {
-            console.error(`Error checking ${fullName}: ${e.message}`);
+        // 不足がある場合のみリストに追加
+        if (missingFiles.length > 0) {
+            console.log(`❌ ${repo.full_name}: Missing [${missingFiles.join(', ')}]`);
+            resultList.push({
+                repo: repo.full_name,
+                url: repo.html_url,
+                missing: missingFiles
+            });
+        } else {
+            console.log(`✅ ${repo.full_name}: OK`);
         }
     }
 
-    fs.writeFileSync('readme.json', JSON.stringify(readmeJson, null, 2));
-    fs.writeFileSync('plugins.json', JSON.stringify(pluginsJson, null, 2));
-    fs.writeFileSync('manifest.json', JSON.stringify(manifestJson, null, 2));
-    
-    console.log('Update complete!');
+    // 結果をJSON形式で保存
+    if (resultList.length > 0) {
+        fs.writeFileSync('missing_files_list.json', JSON.stringify(resultList, null, 2));
+        console.log(`\nDone! Created missing_files_list.json with ${resultList.length} items.`);
+    } else {
+        console.log("\nAll repositories are complete!");
+    }
 }
 
-fetchPlugins();
+main();
