@@ -2,11 +2,15 @@ name: Remote Triggered Check
 
 on:
   repository_dispatch:
-    types: [run_check] # GASからこの名前で合図を送ります
+    types: [run_check]
 
 jobs:
   inspect:
     runs-on: ubuntu-latest
+    # ここにリポジトリへの書き込み権限を追加
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,6 +21,8 @@ jobs:
           node-version: '20'
 
       - name: Run Inspection
+        # env を追加して GitHub CLI が使えるようにする
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           node process_plugins.js
-          # ここに検査ロジックを記述
