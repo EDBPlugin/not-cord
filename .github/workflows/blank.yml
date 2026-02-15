@@ -1,0 +1,32 @@
+name: Check EDBP Plugins
+on:
+  schedule:
+    # 日本時間 00:00 (UTC 15:00) に実行
+    - cron: '0 15 * * *'
+  workflow_dispatch: # 手動実行用
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout not-cord
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Process Plugins
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node process_plugins.js
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update plugin lists (Auto)" || exit 0
+          git push
