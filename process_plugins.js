@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 
 /**
- * topic:edbp-plugin が付いたリポジトリを検索
+ * リポジトリを検索
  */
 function fetchPlugins() {
     console.log("Searching for: topic:edbp-plugin");
@@ -17,11 +17,10 @@ function fetchPlugins() {
 }
 
 /**
- * リポジトリ内の特定のファイルをチェックする
+ * 指定したファイルがリポジトリにあるか確認
  */
 function checkFileExists(repoFullName, filePath) {
     try {
-        // gh api でファイル情報を取得。存在しないとエラー(404)を投げる
         execSync(`gh api repos/${repoFullName}/contents/${filePath}`, { stdio: 'ignore' });
         return true; 
     } catch (error) {
@@ -34,48 +33,42 @@ function checkFileExists(repoFullName, filePath) {
  */
 function main() {
     const repos = fetchPlugins();
-    const resultList = [];
+    
+    // 不足分を記録するオブジェクト
+    const missingData = {
+        manifest: [],
+        plugins: [],
+        readme: []
+    };
 
-    console.log(`Found ${repos.length} repositories. Checking files...\n`);
+    console.log(`Found ${repos.length} repositories. Checking files...`);
 
     for (const repo of repos) {
-        const missingFiles = [];
-        
+        const name = repo.full_name;
+        console.log(`Checking [${name}]...`);
+
         // 1. manifest.json のチェック
-        if (!checkFileExists(repo.full_name, 'manifest.json')) {
-            missingFiles.push('manifest.json');
+        if (!checkFileExists(name, 'manifest.json')) {
+            missingData.manifest.push({ name, url: repo.html_url });
         }
 
         // 2. plugins.js のチェック
-        if (!checkFileExists(repo.full_name, 'plugins.js')) {
-            missingFiles.push('plugins.json');
+        if (!checkFileExists(name, 'plugins.js')) {
+            missingData.plugins.push({ name, url: repo.html_url });
         }
 
         // 3. README.md のチェック
-        if (!checkFileExists(repo.full_name, 'README.md')) {
-            missingFiles.push('readme.json');
-        }
-
-        // 不足がある場合のみリストに追加
-        if (missingFiles.length > 0) {
-            console.log(`❌ ${repo.full_name}: Missing [${missingFiles.join(', ')}]`);
-            resultList.push({
-                repo: repo.full_name,
-                url: repo.html_url,
-                missing: missingFiles
-            });
-        } else {
-            console.log(`✅ ${repo.full_name}: OK`);
+        if (!checkFileExists(name, 'README.md')) {
+            missingData.readme.push({ name, url: repo.html_url });
         }
     }
 
-    // 結果をJSON形式で保存
-    if (resultList.length > 0) {
-        fs.writeFileSync('missing_files_list.json', JSON.stringify(resultList, null, 2));
-        console.log(`\nDone! Created missing_files_list.json with ${resultList.length} items.`);
-    } else {
-        console.log("\nAll repositories are complete!");
-    }
+    // 各JSONファイルへの書き出し
+    fs.writeFileSync('manifest.json', JSON.stringify(missingData.manifest, null, 2));
+    fs.writeFileSync('plugins.json', JSON.stringify(missingData.plugins, null, 2));
+    fs.writeFileSync('readme.json', JSON.stringify(missingData.readme, null, 2));
+
+    console.log("\nUpdate complete: manifest.json, plugins.json, readme.json created.");
 }
 
 main();
