@@ -37,7 +37,6 @@ function main() {
     // 不足分を記録するオブジェクト
     const missingData = {
         manifest: [],
-        plugin: [],
         readme: []
     };
 
@@ -52,12 +51,7 @@ function main() {
             missingData.manifest.push({ name, url: repo.html_url });
         }
 
-        // 2. plugin.js のチェック
-        if (!checkFileExists(name, 'plugin.js')) {
-            missingData.plugin.push({ name, url: repo.html_url });
-        }
-
-        // 3. README.md のチェック
+        // 2. README.md のチェック
         if (!checkFileExists(name, 'README.md')) {
             missingData.readme.push({ name, url: repo.html_url });
         }
@@ -65,10 +59,9 @@ function main() {
 
     // 各JSONファイルへの書き出し
     fs.writeFileSync('manifest.json', JSON.stringify(missingData.manifest, null, 2));
-    fs.writeFileSync('plugin.json', JSON.stringify(missingData.plugin, null, 2));
     fs.writeFileSync('readme.json', JSON.stringify(missingData.readme, null, 2));
 
-    console.log("\nUpdate complete: manifest.json, plugin.json, readme.json created.");
+    console.log("\nUpdate complete: manifest.json, readme.json created.");
 }
 
 main();
