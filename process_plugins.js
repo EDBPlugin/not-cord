@@ -2,19 +2,16 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 
 async function fetchPlugins() {
-    const topic = 'edbp-plugin';
-    const query = `topic:${topic}`;
+    const query = `topic:edbp-plugin`;
     const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}`;
     
     console.log(`Searching for: ${url}`);
-    
-    // GitHub CLI (gh) を使って認証済みのリクエストを投げる
     const response = JSON.parse(execSync(`gh api "${url}"`).toString());
     const repos = response.items;
 
     const readmeJson = []; // README.md がない
-    const pluginJson = []; // plugin.js がない
-    const notCordList = []; // 両方またはコードがない
+    const pluginsJson = []; // plugin.js がない
+    const allJson = []; // 両方ない
 
     for (const repo of repos) {
         const fullName = repo.full_name;
@@ -34,22 +31,22 @@ async function fetchPlugins() {
                 description: repo.description
             };
 
-            if (!hasReadme) readmeJson.push(repoData);
-            if (!hasPluginJs) pluginJson.push(repoData);
-            
-            // いずれかが欠けている、あるいは「コードがない」とみなす場合
-            if (!hasReadme || !hasPluginJs) {
-                notCordList.push(repoData);
+            if (!hasReadme && !hasPluginJs) {
+                // 両方ない場合は all.json のみ
+                allJson.push(repoData);
+            } else if (!hasReadme) {
+                readmeJson.push(repoData);
+            } else if (!hasPluginJs) {
+                pluginsJson.push(repoData);
             }
         } catch (e) {
             console.error(`Error checking ${fullName}: ${e.message}`);
         }
     }
 
-    // ファイル書き出し
     fs.writeFileSync('readme.json', JSON.stringify(readmeJson, null, 2));
-    fs.writeFileSync('plugin.json', JSON.stringify(pluginJson, null, 2));
-    fs.writeFileSync('plugins.json', JSON.stringify(notCordList, null, 2));
+    fs.writeFileSync('plugins.json', JSON.stringify(pluginsJson, null, 2));
+    fs.writeFileSync('all.json', JSON.stringify(allJson, null, 2));
     
     console.log('Update complete!');
 }
