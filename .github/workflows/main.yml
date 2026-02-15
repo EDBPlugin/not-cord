@@ -30,6 +30,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add manifest.json plugins.json readme.json
+          git add manifest.json plugin.json readme.json
           # 差分があるときだけコミットしてプッシュ
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update missing files list" && git push)
