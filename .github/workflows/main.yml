@@ -1,6 +1,24 @@
-steps:
+name: Remote Triggered Check
+
+on:
+  repository_dispatch:
+    types: [run_check]
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    # 書き込み権限を明示的に許可
+    permissions:
+      contents: write
+    
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Run Inspection
         env:
@@ -13,5 +31,5 @@ steps:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add manifest.json plugins.json readme.json
-          # 差分があるときだけコミット
+          # 差分があるときだけコミットしてプッシュ
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update missing files list" && git push)
