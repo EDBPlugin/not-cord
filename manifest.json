@@ -1,5 +1,9 @@
 [
   {
+    "name": "EDBPlugin/debug-editor-plugin",
+    "url": "https://github.com/EDBPlugin/debug-editor-plugin"
+  },
+  {
     "name": "appipinopi/Plugin-test",
     "url": "https://github.com/appipinopi/Plugin-test"
   }
