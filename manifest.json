@@ -2,5 +2,9 @@
   {
     "name": "appipinopi/Plugin-test",
     "url": "https://github.com/appipinopi/Plugin-test"
+  },
+  {
+    "name": "yuta25912/VCManager",
+    "url": "https://github.com/yuta25912/VCManager"
   }
 ]
