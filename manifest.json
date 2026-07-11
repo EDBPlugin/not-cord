@@ -1,5 +1,9 @@
 [
   {
+    "name": "appipinopi/Malicious-Test-Plugin",
+    "url": "https://github.com/appipinopi/Malicious-Test-Plugin"
+  },
+  {
     "name": "appipinopi/Plugin-test",
     "url": "https://github.com/appipinopi/Plugin-test"
   }
