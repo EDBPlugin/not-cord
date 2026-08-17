@@ -1,6 +1,30 @@
 [
   {
+    "name": "himais0giiiin/KEITO-Cloud-Deployer",
+    "url": "https://github.com/himais0giiiin/KEITO-Cloud-Deployer"
+  },
+  {
     "name": "appipinopi/Plugin-test",
     "url": "https://github.com/appipinopi/Plugin-test"
+  },
+  {
+    "name": "yuta25912/AIChecker",
+    "url": "https://github.com/yuta25912/AIChecker"
+  },
+  {
+    "name": "yuta25912/AutoGuard",
+    "url": "https://github.com/yuta25912/AutoGuard"
+  },
+  {
+    "name": "appipinopi/Malicious-Test-Plugin",
+    "url": "https://github.com/appipinopi/Malicious-Test-Plugin"
+  },
+  {
+    "name": "yuta25912/EasyTranslate",
+    "url": "https://github.com/yuta25912/EasyTranslate"
+  },
+  {
+    "name": "yuta25912/VCManager",
+    "url": "https://github.com/yuta25912/VCManager"
   }
 ]
