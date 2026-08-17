@@ -1,26 +1,6 @@
 [
   {
-    "name": "appipinopi/Plugin-test",
-    "url": "https://github.com/appipinopi/Plugin-test"
-  },
-  {
     "name": "appipinopi/SQL-Generator-Viewer",
     "url": "https://github.com/appipinopi/SQL-Generator-Viewer"
-  },
-  {
-    "name": "yuta25912/AutoGuard",
-    "url": "https://github.com/yuta25912/AutoGuard"
-  },
-  {
-    "name": "yuta25912/EasyTranslate",
-    "url": "https://github.com/yuta25912/EasyTranslate"
-  },
-  {
-    "name": "yuta25912/CheckStatus",
-    "url": "https://github.com/yuta25912/CheckStatus"
-  },
-  {
-    "name": "appipinopi/TimeScheduler",
-    "url": "https://github.com/appipinopi/TimeScheduler"
   }
 ]
